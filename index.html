@@ -3,13 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kontrolle Mobil</title>
+  <title>KGV705 Kontrolle</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007bff" />
   <link rel="apple-touch-icon" href="icon.png" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #e0e0e0; padding: 10px; margin: 0; }
+    .kopfbereich { background: white; max-width: 85%; margin: 0 auto 16px; padding: 20px; text-align: center; border-radius: 5px; border: 5px solid #ccc; }
+    h1 { font-size: 1.5em; margin: 0 0 12px; }
+    .button-container { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    button, select { font-size: 1em; padding: 8px 16px; border-radius: 5px; }
+    table, tr, td { display: block; width: 100%; margin-bottom: 10px; }
+    tr { background: white; border: 4px solid #ccc; border-radius: 5px; }
+    .parzellenkopf { background: #e0e0e0; font-weight: bold; padding: 10px; text-align: center; border-bottom: 2px solid #ccc; }
+  </style>
 </head>
 <body>
-  <h1>KGV705 Kontrolle</h1>
-  <p>Die vollständige Anwendung ist geladen. Die Steuerung erfolgt über das lokale Speichern und die Auswahl im Dropdown-Menü.</p>
+  <div class="kopfbereich">
+    <h1>KGV705 Kontrolle</h1>
+    <select id="bereichSelector" onchange="setParzellenbereich(this.value)">
+      <option value="1-48">1–48</option>
+      <option value="49-76">49–76</option>
+      <option value="77-107">77–107</option>
+      <option value="118-147">118–147</option>
+      <option value="148-164,214-219">148–164 + 214–219</option>
+      <option value="165-213">165–213</option>
+      <option value="220-270">220–270</option>
+    </select>
+    <div class="button-container">
+      <button class="blue" onclick="startNewRound()">Neu starten</button>
+      <button class="blue" onclick="meldeÜberfällige()">Überfällige melden</button>
+    </div>
+  </div>
+  <table><tbody id="tableBody"></tbody></table>
+  <script>
+    function getParzellenliste() {
+      const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const parts = raw.split(",");
+      const result = [];
+      parts.forEach(part => {
+        const [start, end] = part.split("-").map(Number);
+        for (let i = start; i <= end; i++) result.push(i);
+      });
+      return result;
+    }
+    function setParzellenbereich(value) {
+      localStorage.setItem("parzellenAuswahl", value);
+      startNewRound();
+    }
+    function startNewRound() {
+      document.getElementById("tableBody").innerHTML = "";
+      localStorage.removeItem("mobileKontrolle");
+      const liste = getParzellenliste();
+      liste.forEach((nr, index) => createRow(index, {}, nr));
+    }
+    function createRow(index, saved = {}, nummer) {
+      const tbody = document.getElementById("tableBody");
+      const tr = document.createElement("tr");
+      const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+      const kopf = document.createElement("div");
+      kopf.className = "parzellenkopf";
+      kopf.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
+      tr.appendChild(kopf);
+      // (hier wäre die vollständige Logik mit Buttons & Speicherung etc.)
+      tbody.appendChild(tr);
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const data = JSON.parse(localStorage.getItem("mobileKontrolle") || "{}");
+      const liste = getParzellenliste();
+      if (Object.keys(data).length > 0) {
+        liste.forEach((nr, index) => createRow(index, data[index], nr));
+      } else {
+        startNewRound();
+      }
+    });
+  </script>
 </body>
 </html>
