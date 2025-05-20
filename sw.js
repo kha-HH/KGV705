@@ -1,13 +1,13 @@
 const CACHE_NAME = 'kgv705-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.png',
-  // Füge weitere zu cachende Dateien (JS, CSS, Bilder etc.) hier hinzu!
+  '/KGV705/',
+  '/KGV705/index.html',
+  '/KGV705/manifest.json',
+  '/KGV705/icon.png',
+  // Hier ggf. weitere Assets ergänzen: JS, CSS, weitere Bilder etc.
 ];
 
-// Install-Event: Initiale Dateien cachen
+// Install: Assets cachen
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
@@ -15,20 +15,19 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate-Event: Alte Caches aufräumen
+// Activate: Alte Caches entfernen
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       )
     )
   );
   self.clients.claim();
 });
 
-// Fetch-Event: Erst aus dem Cache, dann aus dem Netz
+// Fetch: Erst aus Cache, dann aus Netz (Fallback)
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request, {ignoreSearch: true}).then(response => {
