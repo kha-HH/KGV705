@@ -167,8 +167,245 @@
   </div>
   <table><tbody id="tableBody"></tbody></table>
   <script>
-    // Die vollständige JS-Logik ist wie vorher eingefügt (abgekürzt hier)
-    // ...
+function getParzellenliste() {
+      const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const parts = raw.split(",");
+      const result = [];
+
+      parts.forEach(part => {
+        const [start, end] = part.split("-").map(Number);
+        for (let i = start; i <= end; i++) result.push(i);
+      });
+
+      return result;
+    }
+
+    function setParzellenbereich(value) {
+      localStorage.setItem("parzellenAuswahl", value);
+      startNewRound();
+    }
+
+    function startNewRound() {
+      document.getElementById("tableBody").innerHTML = "";
+      localStorage.removeItem("mobileKontrolle");
+      const liste = getParzellenliste();
+      liste.forEach((nr, index) => createRow(index, {}, nr));
+    }
+
+    function createRow(index, saved = {}, nummer) {
+      const tbody = document.getElementById("tableBody");
+      const tr = document.createElement("tr");
+
+      const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+      const kopf = document.createElement("div");
+      kopf.className = "parzellenkopf";
+      kopf.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
+      tr.appendChild(kopf);
+
+      const labels = [
+        "Garten in Ordnung", "Hecke gepflegt", "Allgemeiner Anblick", "Müll vorhanden",
+        "Überwuchs zum Nachbarn", "Satzungsverstoß"
+      ];
+
+      const kommentar = document.createElement("td");
+      const ta = document.createElement("textarea");
+      ta.placeholder = "Kommentar zur Parzelle";
+      if (saved["Kommentar"]) ta.value = saved["Kommentar"];
+      ta.onchange = saveRow;
+      kommentar.appendChild(ta);
+
+      function checkAllGreen() {
+        const isAllGreen = labels.every(label => {
+          const cell = tr.querySelector(`td[data-label="${label}"]`);
+          return cell && cell.classList.contains("gruen");
+        });
+        tr.classList.toggle("gruen", isAllGreen);
+      }
+
+      function checkOverdue() {
+        const now = new Date(); now.setHours(0, 0, 0, 0);
+        const deadline = new Date(inputDate.value); deadline.setHours(0, 0, 0, 0);
+        if (deadline && now > deadline && erledigt.classList.contains("rot")) {
+          fristSetzen.className = "rot hide-label";
+          fristSetzen.innerHTML = '<div class="frist-overdue">Frist nicht eingehalten – Bitte anschreiben!</div>';
+        }
+      }
+
+      labels.forEach(label => {
+        const td = document.createElement("td");
+        td.setAttribute("data-label", label);
+        const rot = document.createElement("button");
+        rot.textContent = "✗";
+        rot.className = "btn-small rot-btn";
+        rot.onclick = () => { td.className = "rot"; checkAllGreen(); saveRow(); };
+        const gruen = document.createElement("button");
+        gruen.textContent = "✓";
+        gruen.className = "btn-small gruen-btn";
+        gruen.onclick = () => { td.className = "gruen"; checkAllGreen(); saveRow(); };
+        td.appendChild(rot);
+        td.appendChild(gruen);
+        if (saved[label]) td.className = saved[label];
+        tr.appendChild(td);
+      });
+
+      const fristSetzen = document.createElement("td");
+      fristSetzen.setAttribute("data-label", "Frist");
+      const inputDate = document.createElement("input");
+      inputDate.type = "date";
+      if (saved["Zu erledigen bis"]) inputDate.value = saved["Zu erledigen bis"];
+      inputDate.onchange = saveRow;
+
+      const dateTd = document.createElement("td");
+      dateTd.setAttribute("data-label", "Zu erledigen bis");
+      dateTd.appendChild(inputDate);
+      if (saved["Frist"] && saved["Frist"].includes("rot")) {
+        dateTd.classList.add("rot");
+      }
+
+      const fristBtn = document.createElement("button");
+      fristBtn.textContent = "Setzen";
+      fristBtn.onclick = () => {
+        const fristDatum = new Date();
+        fristDatum.setDate(fristDatum.getDate() + 14);
+        const yyyy = fristDatum.getFullYear();
+        const mm = String(fristDatum.getMonth() + 1).padStart(2, '0');
+        const dd = String(fristDatum.getDate()).padStart(2, '0');
+        inputDate.value = `${yyyy}-${mm}-${dd}`;
+        fristSetzen.className = "rot";
+        fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
+        dateTd.classList.add("rot");
+        checkOverdue(); saveRow();
+      };
+
+      if (saved["Frist"] && saved["Frist"].includes("rot") && saved["Erledigt"] === "rot") {
+        fristSetzen.className = "rot hide-label";
+        fristSetzen.innerHTML = '<div class="frist-overdue">Frist nicht eingehalten – Bitte anschreiben!</div>';
+      } else if (saved["Frist"] && saved["Frist"].includes("rot")) {
+        fristSetzen.className = "rot";
+        fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
+      } else {
+        fristSetzen.appendChild(fristBtn);
+      }
+
+      tr.appendChild(fristSetzen);
+      tr.appendChild(dateTd);
+
+      const erledigt = document.createElement("td");
+      erledigt.setAttribute("data-label", "Erledigt");
+      const r = document.createElement("button");
+      r.textContent = "✗";
+      r.className = "btn-small rot-btn";
+      const g = document.createElement("button");
+      g.textContent = "✓";
+      g.className = "btn-small gruen-btn";
+      r.onclick = () => {
+        erledigt.className = "rot";
+        tr.classList.add("row-alert");
+        checkOverdue(); saveRow();
+      };
+      g.onclick = () => {
+        erledigt.className = "gruen";
+        tr.classList.remove("row-alert");
+        dateTd.classList.remove("rot");
+        labels.forEach(label => {
+          const feld = tr.querySelector(`td[data-label='${label}']`);
+          if (feld) feld.className = "gruen";
+        });
+        const deadline = new Date(inputDate.value); deadline.setHours(0, 0, 0, 0);
+        const heute = new Date(); heute.setHours(0, 0, 0, 0);
+        if (fristSetzen.classList.contains("rot") && heute <= deadline) {
+          fristSetzen.className = "rot";
+          fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
+        } else {
+          fristSetzen.innerHTML = "";
+          fristSetzen.classList.remove("hide-label");
+        }
+        checkAllGreen(); saveRow();
+      };
+      erledigt.appendChild(r);
+      erledigt.appendChild(g);
+      if (saved.Erledigt) {
+        erledigt.className = saved.Erledigt;
+        if (saved.Erledigt === "rot") tr.classList.add("row-alert");
+      }
+      tr.appendChild(erledigt);
+      tr.appendChild(kommentar);
+      tbody.appendChild(tr);
+
+      function saveRow() {
+        const data = JSON.parse(localStorage.getItem("mobileKontrolle") || "{}");
+        const entry = {};
+        labels.forEach(label => {
+          entry[label] = tr.querySelector(`td[data-label='${label}']`)?.className || "";
+        });
+        entry["Frist"] = fristSetzen.className;
+        entry["Zu erledigen bis"] = inputDate.value;
+        entry["Kommentar"] = ta.value;
+        entry["Erledigt"] = erledigt.className;
+        entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+        entry["Parzelle"] = nummer;
+        localStorage.setItem("mobileKontrolle", JSON.stringify({ ...data, [index]: entry }));
+      }
+    }
+
+    function meldeÜberfällige() {
+      const data = JSON.parse(localStorage.getItem("mobileKontrolle") || "{}");
+      let body = "Folgende Parzellen haben gesetzte Fristen nicht eingehalten. Die aufgeführten Punkte wurden beanstandet:\n\n";
+      let count = 0;
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+
+      Object.entries(data).forEach(([index, entry]) => {
+        if (!entry["Zu erledigen bis"]) return;
+        const deadline = new Date(entry["Zu erledigen bis"]);
+        if (isNaN(deadline)) return;
+        deadline.setHours(0, 0, 0, 0);
+
+        const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
+        const isOverdue = now > deadline;
+        const notDone = entry["Erledigt"] !== "gruen";
+
+        if (hasFrist && isOverdue && notDone) {
+          count++;
+          const nr = entry["Parzelle"] || (Number(index) + 1);
+          body += `Parzelle ${nr} – Frist nicht eingehalten:\n`;
+
+          Object.entries(entry).forEach(([key, value]) => {
+            if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
+              body += `- ${key}\n`;
+            }
+          });
+
+          if (entry["Kommentar"]) {
+            body += `Kommentar: ${entry["Kommentar"]}\n`;
+          }
+
+          body += "\n";
+        }
+      });
+
+      if (count > 0) {
+        const subject = encodeURIComponent("[Wegekontrolle] Meldung Parzellen");
+        const mailBody = encodeURIComponent(body);
+        window.location.href = `mailto:kirsten@nachtzuschlag.de?subject=${subject}&body=${mailBody}`;
+      } else {
+        alert("Keine überfälligen Parzellen gefunden.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const data = JSON.parse(localStorage.getItem("mobileKontrolle") || "{}");
+      const liste = getParzellenliste();
+      if (Object.keys(data).length > 0) {
+        liste.forEach((nr, index) => createRow(index, data[index], nr));
+      } else {
+        startNewRound();
+      }
+
+      window.startNewRound = startNewRound;
+      window.meldeÜberfällige = meldeÜberfällige;
+      window.setParzellenbereich = setParzellenbereich;
+    });
   </script>
 </body>
 </html>
