@@ -1,7 +1,7 @@
 {
   "name": "Wegekontrolle",
   "short_name": "KGV705",
- "start_url": "./"
+ "start_url": "/KGV705/"
   "display": "standalone",
   "background_color": "#e0e0e0",
   "theme_color": "#007bff",
