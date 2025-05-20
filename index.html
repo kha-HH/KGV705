@@ -432,12 +432,12 @@ function getParzellenliste() {
       window.setParzellenbereich = setParzellenbereich;
     });
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/KGV705/sw.js');
-    });
-  }
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/KGV705/sw.js');
+  });
+}
 </script>
 </body>
 </html>
