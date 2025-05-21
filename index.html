@@ -386,7 +386,7 @@
   function meldeÜberfällige() {
     const bereichKey = getBereichKey();
     const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    let body = "Folgende Parzellen haben gesetzte Fristen nicht eingehalten. Die aufgeführten Punkte wurden beanstandet:\n\n";
+    let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie Beanstandung wurde in der gesetzten Frist nicht behoben:\n\n";
     let count = 0;
     const now = new Date(); now.setHours(0, 0, 0, 0);
 
@@ -403,7 +403,7 @@
       if (hasFrist && isOverdue && notDone) {
         count++;
         const nr = entry["Parzelle"] || (Number(index) + 1);
-        body += `Parzelle ${nr} – Frist nicht eingehalten:\n`;
+        body += `Parzelle ${nr}:\n`;
 
         Object.entries(entry).forEach(([key, value]) => {
           if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
