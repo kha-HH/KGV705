@@ -210,9 +210,10 @@
   }
 
   function setParzellenbereich(value) {
-    localStorage.setItem("parzellenAuswahl", value);
-    startNewRound();
-  }
+  localStorage.setItem("parzellenAuswahl", value);
+  window.location.reload(); // 🔁 Seite neu laden, ohne Daten zu verlieren
+}
+
 
   function startNewRound() {
     document.getElementById("tableBody").innerHTML = "";
