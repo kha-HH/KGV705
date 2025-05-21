@@ -222,7 +222,11 @@
     liste.forEach((nr, index) => createRow(index, {}, nr));
   }
 
-  function createRow(index, saved = {}, nummer) {
+  function createRow(index, savedInput = {}, nummer) {
+  const bereichKey = getBereichKey();
+  const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+  const saved = fullData[index] || savedInput;
+
     const tbody = document.getElementById("tableBody");
     const tr = document.createElement("tr");
 
