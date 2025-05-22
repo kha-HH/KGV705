@@ -385,57 +385,56 @@
   }
 
   function meldeÜberfällige() {
-    const bereichKey = getBereichKey();
-    const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie Beanstandung wurde in der gesetzten Frist nicht behoben:\n\n";
-    let count = 0;
-    const now = new Date(); now.setHours(0, 0, 0, 0);
+  const bereichKey = getBereichKey();
+  const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+  let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie gesetzte Frist wurde nicht eingehalten:\n\n";
+  let count = 0;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
 
-    Object.entries(data).forEach(([index, entry]) => {
-      if (!entry["Zu erledigen bis"]) return;
-      const deadline = new Date(entry["Zu erledigen bis"]);
-      if (isNaN(deadline)) return;
-      deadline.setHours(0, 0, 0, 0);
+  // Monat bestimmen für Betreff
+  const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
+  const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
+  const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
 
-      const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
-      const isOverdue = now > deadline;
-      const notDone = entry["Erledigt"] !== "gruen";
+  Object.entries(data).forEach(([index, entry]) => {
+    if (!entry["Zu erledigen bis"]) return;
+    const deadline = new Date(entry["Zu erledigen bis"]);
+    if (isNaN(deadline)) return;
+    deadline.setHours(0, 0, 0, 0);
 
-      if (hasFrist && isOverdue && notDone) {
-        count++;
-        const nr = entry["Parzelle"] || (Number(index) + 1);
-        const fristDatum = new Date(entry["Zu erledigen bis"]);
-        const fristText = fristDatum.toLocaleDateString("de-DE");
-        body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+    const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
+    const isOverdue = now > deadline;
+    const notDone = entry["Erledigt"] !== "gruen";
 
+    if (hasFrist && isOverdue && notDone) {
+      count++;
+      const nr = entry["Parzelle"] || (Number(index) + 1);
+      const fristText = deadline.toLocaleDateString("de-DE");
+      body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
 
-        Object.entries(entry).forEach(([key, value]) => {
-          if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
-            body += `- ${key}\n`;
-          }
-        });
-
-        if (entry["Kommentar"]) {
-          body += `Kommentar: ${entry["Kommentar"]}\n`;
+      Object.entries(entry).forEach(([key, value]) => {
+        if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
+          body += `- ${key}\n`;
         }
+      });
 
-        body += "\n";
+      if (entry["Kommentar"]) {
+        body += `Kommentar: ${entry["Kommentar"]}\n`;
       }
-    });
 
-    if (count > 0) {
-      // Monat ermitteln (aus erstem gespeicherten Eintrag mit Kontrolldatum)
-const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
-const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
-const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
-const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
-
-      const mailBody = encodeURIComponent(body);
-      window.location.href = `mailto:kgv705@gartenfreunde-hh.de?subject=${subject}&body=${mailBody}`;
-    } else {
-      alert("Keine überfälligen Parzellen gefunden.");
+      body += "\n";
     }
+  });
+
+  if (count > 0) {
+    const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
+    const mailBody = encodeURIComponent(body);
+    window.location.href = `mailto:kgv705@gartenfreunde-hh.de?subject=${subject}&body=${mailBody}`;
+  } else {
+    alert("Keine überfälligen Parzellen gefunden.");
   }
+}
+
 
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
