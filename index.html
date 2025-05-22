@@ -404,7 +404,10 @@
       if (hasFrist && isOverdue && notDone) {
         count++;
         const nr = entry["Parzelle"] || (Number(index) + 1);
-        body += `Parzelle ${nr}:\n`;
+        const fristDatum = new Date(entry["Zu erledigen bis"]);
+        const fristText = fristDatum.toLocaleDateString("de-DE");
+        body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+
 
         Object.entries(entry).forEach(([key, value]) => {
           if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
@@ -421,7 +424,12 @@
     });
 
     if (count > 0) {
-      const subject = encodeURIComponent("[Wegekontrolle] Meldung Parzellen");
+      // Monat ermitteln (aus erstem gespeicherten Eintrag mit Kontrolldatum)
+const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
+const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
+const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
+const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
+
       const mailBody = encodeURIComponent(body);
       window.location.href = `mailto:kgv705@gartenfreunde-hh.de?subject=${subject}&body=${mailBody}`;
     } else {
