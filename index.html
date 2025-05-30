@@ -191,7 +191,7 @@
     </div>
   </div>
   <table><tbody id="tableBody"></tbody></table>
-  <script>
+<script>
   function getParzellenliste() {
     const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
     const parts = raw.split(",");
@@ -210,24 +210,25 @@
   }
 
   function setParzellenbereich(value) {
-  localStorage.setItem("parzellenAuswahl", value);
-  window.location.reload(); // 🔁 Seite neu laden, ohne Daten zu verlieren
-}
-
+    localStorage.setItem("parzellenAuswahl", value);
+    window.location.reload(); // Seite neu laden, um Bereich zu wechseln
+  }
 
   function startNewRound() {
-    document.getElementById("tableBody").innerHTML = "";
     const bereichKey = getBereichKey();
-    localStorage.removeItem(bereichKey);
     const liste = getParzellenliste();
+    const leeresObjekt = {};
+    liste.forEach((nr, index) => leeresObjekt[index] = {});
+    localStorage.setItem(bereichKey, JSON.stringify(leeresObjekt));
+    document.getElementById("tableBody").innerHTML = "";
     liste.forEach((nr, index) => createRow(index, {}, nr));
   }
 
   function createRow(index, savedInput = {}, nummer) {
-  const bereichKey = getBereichKey();
-  const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-  const saved = fullData[index] || savedInput;
-
+    const bereichKey = getBereichKey();
+    const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+    const saved = fullData[index] || savedInput;
+    
     const tbody = document.getElementById("tableBody");
     const tr = document.createElement("tr");
 
@@ -365,6 +366,13 @@
     }
     tr.appendChild(erledigt);
     tr.appendChild(kommentar);
+
+    // ✅ NEU: Nur anhängen, wenn NICHT alles grün ist
+    const alleGruen = labels.every(label => saved[label] === "gruen") && saved["Erledigt"] === "gruen";
+    if (alleGruen) {
+      return; // Nicht anzeigen
+    }
+
     tbody.appendChild(tr);
 
     function saveRow() {
@@ -385,56 +393,55 @@
   }
 
   function meldeÜberfällige() {
-  const bereichKey = getBereichKey();
-  const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-  let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie gesetzte Frist wurde nicht eingehalten:\n\n";
-  let count = 0;
-  const now = new Date(); now.setHours(0, 0, 0, 0);
+    const bereichKey = getBereichKey();
+    const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+    let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie gesetzte Frist wurde nicht eingehalten:\n\n";
+    let count = 0;
+    const now = new Date(); now.setHours(0, 0, 0, 0);
 
-  // Monat bestimmen für Betreff
-  const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
-  const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
-  const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
+    // Monat bestimmen für Betreff
+    const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
+    const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
+    const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
 
-  Object.entries(data).forEach(([index, entry]) => {
-    if (!entry["Zu erledigen bis"]) return;
-    const deadline = new Date(entry["Zu erledigen bis"]);
-    if (isNaN(deadline)) return;
-    deadline.setHours(0, 0, 0, 0);
+    Object.entries(data).forEach(([index, entry]) => {
+      if (!entry["Zu erledigen bis"]) return;
+      const deadline = new Date(entry["Zu erledigen bis"]);
+      if (isNaN(deadline)) return;
+      deadline.setHours(0, 0, 0, 0);
 
-    const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
-    const isOverdue = now > deadline;
-    const notDone = entry["Erledigt"] !== "gruen";
+      const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
+      const isOverdue = now > deadline;
+      const notDone = entry["Erledigt"] !== "gruen";
 
-    if (hasFrist && isOverdue && notDone) {
-      count++;
-      const nr = entry["Parzelle"] || (Number(index) + 1);
-      const fristText = deadline.toLocaleDateString("de-DE");
-      body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+      if (hasFrist && isOverdue && notDone) {
+        count++;
+        const nr = entry["Parzelle"] || (Number(index) + 1);
+        const fristText = deadline.toLocaleDateString("de-DE");
+        body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
 
-      Object.entries(entry).forEach(([key, value]) => {
-        if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
-          body += `- ${key}\n`;
+        Object.entries(entry).forEach(([key, value]) => {
+          if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
+            body += `- ${key}\n`;
+          }
+        });
+
+        if (entry["Kommentar"]) {
+          body += `Kommentar: ${entry["Kommentar"]}\n`;
         }
-      });
 
-      if (entry["Kommentar"]) {
-        body += `Kommentar: ${entry["Kommentar"]}\n`;
+        body += "\n";
       }
+    });
 
-      body += "\n";
+    if (count > 0) {
+      const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
+      const mailBody = encodeURIComponent(body);
+      window.location.href = `mailto:kirsten@nachtzuschlag.de?subject=${subject}&body=${mailBody}`;
+    } else {
+      alert("Keine überfälligen Parzellen gefunden.");
     }
-  });
-
-  if (count > 0) {
-    const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
-    const mailBody = encodeURIComponent(body);
-    window.location.href = `mailto:kgv705@gartenfreunde-hh.de?subject=${subject}&body=${mailBody}`;
-  } else {
-    alert("Keine überfälligen Parzellen gefunden.");
   }
-}
-
 
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
@@ -453,7 +460,6 @@
   });
 </script>
 
-<script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("sw.js").then(() => {
       console.log("Service Worker registriert");
