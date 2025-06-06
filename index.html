@@ -256,18 +256,19 @@ function createRow(index, savedInput = {}, nummer) {
   tbody.appendChild(details);
 
   function saveRow() {
-    const bereichKey = getBereichKey();
-    const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    const entry = {};
-    labels.forEach(label => {
-      entry[label] = content.querySelector(`td[data-label='${label}']`)?.className || "";
-    });
-    entry["Kommentar"] = ta.value;
-    entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
-    entry["Parzelle"] = nummer;
-    localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
-  }
+  const bereichKey = getBereichKey();
+  const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+  const entry = {};
+  labels.forEach(label => {
+    const tdElement = [...content.querySelectorAll("td")].find(td => td.getAttribute("data-label") === label);
+    entry[label] = tdElement?.className || "";
+  });
+  entry["Kommentar"] = ta.value;
+  entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+  entry["Parzelle"] = nummer;
+  localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
