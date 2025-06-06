@@ -211,7 +211,7 @@
 
   function setParzellenbereich(value) {
     localStorage.setItem("parzellenAuswahl", value);
-    window.location.reload(); // Seite neu laden, um Bereich zu wechseln
+    window.location.reload(); // 🔁 Seite neu laden, um Bereich zu wechseln
   }
 
   function startNewRound() {
@@ -228,7 +228,7 @@
     const bereichKey = getBereichKey();
     const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
     const saved = fullData[index] || savedInput;
-    
+
     const tbody = document.getElementById("tableBody");
     const tr = document.createElement("tr");
 
@@ -368,9 +368,11 @@
     tr.appendChild(kommentar);
 
     // ✅ NEU: Nur anhängen, wenn NICHT alles grün ist
-    const alleGruen = labels.every(label => saved[label] === "gruen") && saved["Erledigt"] === "gruen";
+    const alleGruen = labels.every(label => saved[label] && saved[label].includes("gruen")) 
+                   && saved["Erledigt"] && saved["Erledigt"].includes("gruen");
+
     if (alleGruen) {
-      return; // Nicht anzeigen
+      return; // Fertige Parzelle wird nicht angezeigt
     }
 
     tbody.appendChild(tr);
