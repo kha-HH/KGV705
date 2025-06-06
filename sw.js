@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kgv705-v1';
+const CACHE_NAME = 'kgv705-v2';
 const ASSETS_TO_CACHE = [
   '/KGV705/',
   '/KGV705/index.html',
