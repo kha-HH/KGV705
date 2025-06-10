@@ -76,7 +76,7 @@
 
     details {
       background: white;
-      max-width: 98%;
+      max-width: 85%; /* Anpassung an die Breite von .kopfbereich */
       margin: 16px auto;
       border: 5px solid #ccc;
       border-radius: 5px;
@@ -101,21 +101,25 @@
 
     .accordion-content {
       padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    td {
+    .row {
       position: relative;
       padding: 10px;
       border-bottom: 1px solid #eee;
+      background: #f9f9f9;
       display: flex;
-      align-items: center;
       justify-content: flex-end;
-      margin: 0 auto;
-      text-align: right;
+      align-items: center;
       font-weight: bold;
+      min-height: 40px;
+      border-radius: 5px;
     }
 
-    td::before {
+    .row::before {
       content: attr(data-label);
       position: absolute;
       left: 10px;
@@ -123,17 +127,16 @@
       transform: translateY(-50%);
       text-align: left;
       white-space: normal;
-      width: 40%;
-      max-width: 150px;
-      box-sizing: border-box;
+      width: 50%;
+      max-width: 200px;
       font-weight: bold;
     }
 
     textarea {
       width: 100%;
-      font-size: 1em;
-      padding: 5px;
       box-sizing: border-box;
+      padding: 8px;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -216,27 +219,28 @@
       ];
 
       labels.forEach(label => {
-        const td = document.createElement("td");
-        td.setAttribute("data-label", label);
+        const row = document.createElement("div");
+        row.className = "row";
+        row.setAttribute("data-label", label);
 
         const rot = document.createElement("button");
         rot.textContent = "✗";
         rot.className = "btn-small rot-btn";
-        rot.onclick = () => { td.className = "rot"; saveRow(); };
+        rot.onclick = () => { row.classList.toggle("rot"); saveRow(); };
 
         const gruen = document.createElement("button");
         gruen.textContent = "✓";
         gruen.className = "btn-small gruen-btn";
-        gruen.onclick = () => { td.className = "gruen"; saveRow(); };
+        gruen.onclick = () => { row.classList.toggle("gruen"); saveRow(); };
 
-        td.appendChild(rot);
-        td.appendChild(gruen);
-        if (saved[label]) td.className = saved[label];
+        row.appendChild(rot);
+        row.appendChild(gruen);
+        if (saved[label]) row.classList.add(saved[label]);
 
-        content.appendChild(td);
+        content.appendChild(row);
       });
 
-      const kommentar = document.createElement("td");
+      const kommentar = document.createElement("div");
       const ta = document.createElement("textarea");
       ta.placeholder = "Kommentar zur Parzelle";
       if (saved["Kommentar"]) ta.value = saved["Kommentar"];
@@ -258,8 +262,8 @@
         const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
         const entry = {};
         labels.forEach(label => {
-          const tdElement = [...content.querySelectorAll("td")].find(td => td.getAttribute("data-label") === label);
-          entry[label] = tdElement?.className || "";
+          const rowElement = [...content.querySelectorAll(".row")].find(row => row.getAttribute("data-label") === label);
+          entry[label] = rowElement?.className || "";
         });
         entry["Kommentar"] = ta.value;
         entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
