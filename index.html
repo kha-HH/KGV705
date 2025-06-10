@@ -4,470 +4,516 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KGV705</title>
- <link rel="manifest" href="/KGV705/manifest.json">
   <meta name="theme-color" content="#444444" />
-  <link rel="apple-touch-icon" href="icon.png" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #e0e0e0;
-      margin: 0;
-      padding: 10px;
-      max-width: 100vw;
-      overflow-x: hidden;
-    }
+    /* Globales Box-Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
-    .kopfbereich {
-      background: white;
-      max-width: 85%;
-      margin: 16px auto;
-      padding: 20px;
-      border-radius: 5px;
-      border: 5px solid #ccc;
-      box-shadow: 0 0 4px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #e0e0e0;
+  margin: 0;
+  padding: 10px;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 
-    h1 {
-      font-size: 1.6em;
-      margin: 0 0 10px 0;
-    }
+.maincontainer {
+  max-width: 850px;
+  width: 85vw;
+  margin: 16px auto;
+}
 
-    .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
+/* Kopfbereich */
+.kopfbereich {
+  width: 100%;
+  background: white;
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 5px;
+  border: 5px solid #ccc;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
 
-    button {
-      padding: 8px 12px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+h1 {
+  font-size: 1.6em;
+  margin: 0 0 10px 0;
+}
 
-    .blue { background-color: #007bff; color: white; }
-    .blue:hover { background-color: #0056b3; }
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
 
-    select {
-      font-size: 1em;
-      padding: 8px 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      text-align: center;
-      margin-bottom: 12px;
-    }
+button {
+  padding: 8px 12px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-    .btn-small {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin: 4px;
-      font-size: 1em;
-      border: 2px solid #ccc;
-      display: inline-block;
-    }
+.blue { background-color: #007bff; color: white; }
+.blue:hover { background-color: #0056b3; }
 
-    .rot-btn { background: #f8d7da; }
-    .gruen-btn { background: #d4edda; }
-    .rot { background-color: #f8d7da !important; }
-    .gruen { background-color: #d4edda !important; }
-    .row-alert { background-color: #f3baba !important; }
-    tr.gruen {
-      background-color: #d4edda !important;
-    }
+select {
+  font-size: 1em;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+  margin-bottom: 12px;
+}
 
-    table, tbody, tr, td {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-    }
+.btn-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-left: 10px;
+  font-size: 1em;
+  border: 2px solid #ccc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-    tr {
-      background: white;
-      border: 4px solid #ccc;
-      margin: 16px auto;
-      border-radius: 5px;
-      overflow: hidden;
-      padding-top: 8px;
-      max-width: 98%;
-    }
+.rot-btn { background: #f8d7da; }
+.gruen-btn { background: #d4edda; }
 
-    .parzellenkopf {
-      font-weight: bold;
-      background: #e0e0e0;
-      padding: 16px;
-      margin: 0 auto 10px auto;
-      text-align: center;
-      font-size: 1.2em;
-      border-bottom: 5px solid #ccc;
-      border-radius: 5px 5px 0 0;
-      max-width: 88%;
-    }
+/* Akkordeons */
+details {
+  background: white;
+  width: 100%;
+  margin: 16px 0;
+  border: 5px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
 
-    td {
-      position: relative;
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      margin: 0 auto;
-      text-align: right;
-      font-weight: bold;
-    }
+details.accordion-gruen,
+summary.accordion-gruen,
+.accordion-content.accordion-gruen {
+  background: #d4edda !important;
+  border-color: #80c687 !important;
+}
 
-    td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      text-align: left;
-      white-space: normal;
-      width: 40%;
-      max-width: 150px;
-      box-sizing: border-box;
-      font-weight: bold;
-    }
+details.accordion-rot,
+summary.accordion-rot,
+.accordion-content.accordion-rot {
+  background: #f8d7da !important;
+  border-color: #ef5350 !important;
+}
 
-    .frist-overdue {
-      font-weight: bold;
-      text-align: center;
-      margin: 10px 0;
-      color: red;
-      width: 100%;
-    }
+details.frist-overdue,
+summary.frist-overdue {
+  background: #f8d7da !important;
+  border-color: #ef5350 !important;
+}
 
-    .frist-gesetzt {
-      font-weight: bold;
-      text-align: right;
-      width: 100%;
-      padding-right: 10px;
-    }
+summary {
+  padding: 16px;
+  font-size: 1.2em;
+  font-weight: bold;
+  background: #e0e0e0;
+  cursor: pointer;
+  border-bottom: 5px solid #ccc;
+  border-radius: 5px 5px 0 0;
+  text-align: center;
+  transition: background 0.3s, border-color 0.3s;
+  width: 100%;
+}
 
-    .hide-label::before {
-      content: none !important;
-    }
+summary::-webkit-details-marker {
+  display: none;
+}
 
-    textarea {
-      width: 100%;
-      font-size: 1em;
-      padding: 5px;
-      box-sizing: border-box;
-    }
+.accordion-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
 
-    input[type="date"] {
-      width: 100%;
-      max-width: 200px;
-      font-family: Arial, sans-serif;
-      font-size: 1em;
-      text-align: right;
-      margin-left: auto;
-      margin-right: 0;
-      display: block;
-      box-sizing: border-box;
-    }
+.row-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.row-block label {
+  flex: 1;
+  font-weight: bold;
+}
+
+.row-block textarea,
+.row-block input[type="date"] {
+  flex: 1;
+  font-size: 1em;
+  padding: 5px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.row-block.gruen { background: #d4edda !important; }
+.row-block.rot   { background: #f8d7da !important; }
+
+.frist-hinweis {
+  color: #b71c1c;
+  font-weight: bold;
+  text-align: center;
+  margin: 6px 0;
+  font-size: 1.1em;
+}
   </style>
 </head>
 <body>
-  <div class="kopfbereich">
-    <h1>Kleingartenverein Brummerkaten 1920 e.V.</h1>
-    <select id="bereichSelector" onchange="setParzellenbereich(this.value)">
-      <option value="1-48">1 – 48</option>
-      <option value="49-76">49 – 76</option>
-      <option value="77-107">77 – 107</option>
-      <option value="118-147">118 – 147</option>
-      <option value="148-164,214-219">148 – 164 + 214 – 219</option>
-      <option value="165-213">165 – 213</option>
-      <option value="220-270">220 – 270</option>
-    </select>
-    <div class="button-container">
-      <button class="blue" onclick="startNewRound()">Neu starten</button>
-      <button class="blue" onclick="meldeÜberfällige()">Überfällige melden</button>
+  <div class="maincontainer">
+    <div class="kopfbereich">
+      <h1>Kleingartenverein Brummerkaten 1920 e.V.</h1>
+      <select id="bereichSelector"></select>
+      <div class="button-container">
+        <button id="btnNew" class="blue">Neu starten</button>
+        <button id="btnMelden" class="blue">Überfällige melden</button>
+      </div>
     </div>
+    <div id="tableBody"></div>
   </div>
-  <table><tbody id="tableBody"></tbody></table>
-<script>
-  function getParzellenliste() {
-    const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
-    const parts = raw.split(",");
-    const result = [];
 
-    parts.forEach(part => {
-      const [start, end] = part.split("-").map(Number);
-      for (let i = start; i <= end; i++) result.push(i);
-    });
-
-    return result;
-  }
-
-  function getBereichKey() {
-    return "mobileKontrolle_" + (localStorage.getItem("parzellenAuswahl") || "1-48");
-  }
-
-  function setParzellenbereich(value) {
-    localStorage.setItem("parzellenAuswahl", value);
-    window.location.reload(); // Seite neu laden, um Bereich zu wechseln
-  }
-
-  function startNewRound() {
-    const bereichKey = getBereichKey();
-    const liste = getParzellenliste();
-    const leeresObjekt = {};
-    liste.forEach((nr, index) => leeresObjekt[index] = {});
-    localStorage.setItem(bereichKey, JSON.stringify(leeresObjekt));
-    document.getElementById("tableBody").innerHTML = "";
-    liste.forEach((nr, index) => createRow(index, {}, nr));
-  }
-
-  function createRow(index, savedInput = {}, nummer) {
-    const bereichKey = getBereichKey();
-    const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    const saved = fullData[index] || savedInput;
-    
-    const tbody = document.getElementById("tableBody");
-    const tr = document.createElement("tr");
-
-    const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
-    const kopf = document.createElement("div");
-    kopf.className = "parzellenkopf";
-    kopf.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
-    tr.appendChild(kopf);
-
-    const labels = [
-      "Garten in Ordnung", "Hecke gepflegt", "Allgemeiner Anblick", "Kein Müll vorhanden",
-      "Kein Überwuchs zum Nachbarn", "Kein Satzungsverstoß"
+  <script>
+    const bereiche = [
+      "1 - 48", "49 - 76", "77 - 107", "118 - 147",
+      "148 - 164, 214 - 219", "165 - 213", "220 - 270"
     ];
 
-    const kommentar = document.createElement("td");
-    const ta = document.createElement("textarea");
-    ta.placeholder = "Kommentar zur Parzelle";
-    if (saved["Kommentar"]) ta.value = saved["Kommentar"];
-    ta.onchange = saveRow;
-    kommentar.appendChild(ta);
-
-    function checkAllGreen() {
-      const isAllGreen = labels.every(label => {
-        const cell = tr.querySelector(`td[data-label="${label}"]`);
-        return cell && cell.classList.contains("gruen");
+    function getParzellenliste() {
+      const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const parts = raw.split(",");
+      const result = [];
+      parts.forEach(part => {
+        const [start, end] = part.split("-").map(Number);
+        for (let i = start; i <= end; i++) result.push(i);
       });
-      tr.classList.toggle("gruen", isAllGreen);
+      return result;
     }
 
-    function checkOverdue() {
-      const now = new Date(); now.setHours(0, 0, 0, 0);
-      const deadline = new Date(inputDate.value); deadline.setHours(0, 0, 0, 0);
-      if (deadline && now > deadline && erledigt.classList.contains("rot")) {
-        fristSetzen.className = "rot hide-label";
-        fristSetzen.innerHTML = '<div class="frist-overdue">Frist nicht eingehalten – Bitte anschreiben!</div>';
-      }
+    function getBereichKey() {
+      return "mobileKontrolle_" + (localStorage.getItem("parzellenAuswahl") || "1-48");
     }
 
-    labels.forEach(label => {
-      const td = document.createElement("td");
-      td.setAttribute("data-label", label);
-      const rot = document.createElement("button");
-      rot.textContent = "✗";
-      rot.className = "btn-small rot-btn";
-      rot.onclick = () => { td.className = "rot"; checkAllGreen(); saveRow(); };
-      const gruen = document.createElement("button");
-      gruen.textContent = "✓";
-      gruen.className = "btn-small gruen-btn";
-      gruen.onclick = () => { td.className = "gruen"; checkAllGreen(); saveRow(); };
-      td.appendChild(rot);
-      td.appendChild(gruen);
-      if (saved[label]) td.className = saved[label];
-      tr.appendChild(td);
-    });
-
-    const fristSetzen = document.createElement("td");
-    fristSetzen.setAttribute("data-label", "Frist");
-    const inputDate = document.createElement("input");
-    inputDate.type = "date";
-    if (saved["Zu erledigen bis"]) inputDate.value = saved["Zu erledigen bis"];
-    inputDate.onchange = saveRow;
-
-    const dateTd = document.createElement("td");
-    dateTd.setAttribute("data-label", "Zu erledigen bis");
-    dateTd.appendChild(inputDate);
-    if (saved["Frist"] && saved["Frist"].includes("rot")) {
-      dateTd.classList.add("rot");
+    function setParzellenbereich(value) {
+      localStorage.setItem("parzellenAuswahl", value);
+      location.reload();
     }
 
-    const fristBtn = document.createElement("button");
-    fristBtn.textContent = "Setzen";
-    fristBtn.onclick = () => {
-      const fristDatum = new Date();
-      fristDatum.setDate(fristDatum.getDate() + 14);
-      const yyyy = fristDatum.getFullYear();
-      const mm = String(fristDatum.getMonth() + 1).padStart(2, '0');
-      const dd = String(fristDatum.getDate()).padStart(2, '0');
-      inputDate.value = `${yyyy}-${mm}-${dd}`;
-      fristSetzen.className = "rot";
-      fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
-      dateTd.classList.add("rot");
-      checkOverdue(); saveRow();
-    };
-
-    if (saved["Frist"] && saved["Frist"].includes("rot") && saved["Erledigt"] === "rot") {
-      fristSetzen.className = "rot hide-label";
-      fristSetzen.innerHTML = '<div class="frist-overdue">Frist nicht eingehalten – Bitte anschreiben!</div>';
-    } else if (saved["Frist"] && saved["Frist"].includes("rot")) {
-      fristSetzen.className = "rot";
-      fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
-    } else {
-      fristSetzen.appendChild(fristBtn);
-    }
-
-    tr.appendChild(fristSetzen);
-    tr.appendChild(dateTd);
-
-    const erledigt = document.createElement("td");
-    erledigt.setAttribute("data-label", "Erledigt");
-    const r = document.createElement("button");
-    r.textContent = "✗";
-    r.className = "btn-small rot-btn";
-    const g = document.createElement("button");
-    g.textContent = "✓";
-    g.className = "btn-small gruen-btn";
-    r.onclick = () => {
-      erledigt.className = "rot";
-      tr.classList.add("row-alert");
-      checkOverdue(); saveRow();
-    };
-    g.onclick = () => {
-      erledigt.className = "gruen";
-      tr.classList.remove("row-alert");
-      dateTd.classList.remove("rot");
-      labels.forEach(label => {
-        const feld = tr.querySelector(`td[data-label='${label}']`);
-        if (feld) feld.className = "gruen";
-      });
-      const deadline = new Date(inputDate.value); deadline.setHours(0, 0, 0, 0);
-      const heute = new Date(); heute.setHours(0, 0, 0, 0);
-      if (fristSetzen.classList.contains("rot") && heute <= deadline) {
-        fristSetzen.className = "rot";
-        fristSetzen.innerHTML = '<div class="frist-gesetzt">gesetzt</div>';
-      } else {
-        fristSetzen.innerHTML = "";
-        fristSetzen.classList.remove("hide-label");
-      }
-      checkAllGreen(); saveRow();
-    };
-    erledigt.appendChild(r);
-    erledigt.appendChild(g);
-    if (saved.Erledigt) {
-      erledigt.className = saved.Erledigt;
-      if (saved.Erledigt === "rot") tr.classList.add("row-alert");
-    }
-    tr.appendChild(erledigt);
-    tr.appendChild(kommentar);
-
-    // ✅ NEU: Nur anhängen, wenn NICHT alles grün ist
-    const alleGruen = labels.every(label => saved[label] === "gruen") && saved["Erledigt"] === "gruen";
-    if (alleGruen) {
-      return; // Nicht anzeigen
-    }
-
-    tbody.appendChild(tr);
-
-    function saveRow() {
+    function startNewRound() {
       const bereichKey = getBereichKey();
-      const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-      const entry = {};
-      labels.forEach(label => {
-        entry[label] = tr.querySelector(`td[data-label='${label}']`)?.className || "";
-      });
-      entry["Frist"] = fristSetzen.className;
-      entry["Zu erledigen bis"] = inputDate.value;
-      entry["Kommentar"] = ta.value;
-      entry["Erledigt"] = erledigt.className;
-      entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
-      entry["Parzelle"] = nummer;
-      localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
+      const liste = getParzellenliste();
+      const leeresObjekt = {};
+      liste.forEach((nr, index) => leeresObjekt[index] = {});
+      localStorage.setItem(bereichKey, JSON.stringify(leeresObjekt));
+      document.getElementById("tableBody").innerHTML = "";
+      liste.forEach((nr, index) => createRow(index, {}, nr));
     }
-  }
 
-  function meldeÜberfällige() {
-    const bereichKey = getBereichKey();
-    const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie gesetzte Frist wurde nicht eingehalten:\n\n";
-    let count = 0;
-    const now = new Date(); now.setHours(0, 0, 0, 0);
+    function createRow(index, savedInput = {}, nummer) {
+      const bereichKey = getBereichKey();
+      const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+      const saved = fullData[index] || savedInput;
+      const container = document.getElementById("tableBody");
 
-    // Monat bestimmen für Betreff
-    const eintragMitDatum = Object.values(data).find(e => e["Kontrolldatum"]);
-    const kontrolldatum = eintragMitDatum?.["Kontrolldatum"] || new Date().toISOString();
-    const monatJahr = new Date(kontrolldatum).toLocaleString("de-DE", { month: "long", year: "numeric" });
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+      summary.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
+      details.appendChild(summary);
 
-    Object.entries(data).forEach(([index, entry]) => {
-      if (!entry["Zu erledigen bis"]) return;
-      const deadline = new Date(entry["Zu erledigen bis"]);
-      if (isNaN(deadline)) return;
-      deadline.setHours(0, 0, 0, 0);
+      const content = document.createElement("div");
+      content.className = "accordion-content";
 
-      const hasFrist = typeof entry["Frist"] === "string" && entry["Frist"].includes("rot");
-      const isOverdue = now > deadline;
-      const notDone = entry["Erledigt"] !== "gruen";
+      const labels = [
+        "Garten in Ordnung", "Hecke gepflegt", "Allgemeiner Anblick",
+        "Kein Müll vorhanden", "Kein Überwuchs zum Nachbarn", "Kein Satzungsverstoß"
+      ];
 
-      if (hasFrist && isOverdue && notDone) {
-        count++;
-        const nr = entry["Parzelle"] || (Number(index) + 1);
-        const fristText = deadline.toLocaleDateString("de-DE");
-        body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+      const state = {};
 
-        Object.entries(entry).forEach(([key, value]) => {
-          if (value === "rot" && !["Frist", "Erledigt", "Kommentar"].includes(key)) {
-            body += `- ${key}\n`;
-          }
+      labels.forEach(label => {
+        const row = document.createElement("div");
+        row.className = "row-block";
+
+        const lab = document.createElement("label");
+        lab.textContent = label;
+
+        const rot = document.createElement("button");
+        rot.textContent = "✗";
+        rot.className = "btn-small rot-btn";
+        rot.onclick = () => {
+          row.classList.remove("gruen");
+          row.classList.remove("rot");
+          row.classList.add("rot");
+          saveRow();
+          checkFrist();
+        };
+
+        const gruen = document.createElement("button");
+        gruen.textContent = "✓";
+        gruen.className = "btn-small gruen-btn";
+        gruen.onclick = () => {
+          row.classList.remove("rot");
+          row.classList.remove("gruen");
+          row.classList.add("gruen");
+          saveRow();
+          checkFrist();
+        };
+
+        row.appendChild(lab);
+        row.appendChild(rot);
+        row.appendChild(gruen);
+
+        if (saved[label]) row.classList.add(saved[label]);
+
+        content.appendChild(row);
+        state[label] = row;
+      });
+
+      // FRIST-Setzen (eigene Zeile)
+      const fristRow = document.createElement("div");
+      fristRow.className = "row-block";
+      const fristLabel = document.createElement("label");
+      fristLabel.textContent = "Frist";
+      const fristBtn = document.createElement("button");
+      fristBtn.textContent = "Setzen";
+      fristBtn.onclick = () => {
+        const datum = new Date();
+        datum.setDate(datum.getDate() + 14);
+        fristDate.value = datum.toISOString().split("T")[0];
+        fristRow.classList.add("rot");
+        saveRow();
+        checkFrist();
+      };
+      fristRow.appendChild(fristLabel);
+      fristRow.appendChild(fristBtn);
+      content.appendChild(fristRow);
+
+      // „Zu erledigen bis“-Zeile (eigene Zeile)
+      const fristDateRow = document.createElement("div");
+      fristDateRow.className = "row-block";
+      const fristDateLabel = document.createElement("label");
+      fristDateLabel.textContent = "Zu erledigen bis";
+      const fristDate = document.createElement("input");
+      fristDate.type = "date";
+      fristDate.value = saved["Zu erledigen bis"] || "";
+      fristDate.onchange = () => {
+        saveRow();
+        checkFrist();
+      };
+      fristDateRow.appendChild(fristDateLabel);
+      fristDateRow.appendChild(fristDate);
+      content.appendChild(fristDateRow);
+
+      // Kommentar-Zeile
+      const kommentarRow = document.createElement("div");
+      kommentarRow.className = "row-block";
+      const kommentarLabel = document.createElement("label");
+      kommentarLabel.textContent = "Kommentar";
+      const kommentar = document.createElement("textarea");
+      kommentar.placeholder = "Kommentar zur Parzelle";
+      kommentar.value = saved["Kommentar"] || "";
+      kommentar.onchange = () => { saveRow(); checkFrist(); };
+      kommentarRow.appendChild(kommentarLabel);
+      kommentarRow.appendChild(kommentar);
+      content.appendChild(kommentarRow);
+
+      // ERLEDIGT-Button-Zeile
+      const erledigtRow = document.createElement("div");
+      erledigtRow.className = "row-block";
+      const erledigtLabel = document.createElement("label");
+      erledigtLabel.textContent = "Erledigt";
+      const erledigtRot = document.createElement("button");
+      erledigtRot.textContent = "✗";
+      erledigtRot.className = "btn-small rot-btn";
+      erledigtRot.onclick = () => {
+        erledigtRow.classList.remove("gruen");
+        erledigtRow.classList.remove("rot");
+        erledigtRow.classList.add("rot");
+        saveRow();
+        checkFrist();
+      };
+      const erledigtGruen = document.createElement("button");
+      erledigtGruen.textContent = "✓";
+      erledigtGruen.className = "btn-small gruen-btn";
+      erledigtGruen.onclick = () => {
+        erledigtRow.classList.remove("rot");
+        erledigtRow.classList.remove("gruen");
+        erledigtRow.classList.add("gruen");
+        saveRow();
+        checkFrist();
+      };
+      erledigtRow.appendChild(erledigtLabel);
+      erledigtRow.appendChild(erledigtRot);
+      erledigtRow.appendChild(erledigtGruen);
+      if (saved["Erledigt"]) erledigtRow.classList.add(saved["Erledigt"]);
+      content.appendChild(erledigtRow);
+
+      // Frist-Hinweis
+      const fristHinweis = document.createElement("div");
+      fristHinweis.className = "frist-hinweis";
+      fristHinweis.style.display = "none";
+      content.appendChild(fristHinweis);
+
+      function saveRow() {
+        const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+        const entry = {};
+        labels.forEach(label => {
+          const block = state[label];
+          entry[label] = block.classList.contains("gruen") ? "gruen" : (block.classList.contains("rot") ? "rot" : "");
         });
+        entry["Frist"] = fristRow.classList.contains("rot") ? "rot" : "";
+        entry["Zu erledigen bis"] = fristDate.value;
+        entry["Kommentar"] = kommentar.value;
+        entry["Erledigt"] = erledigtRow.classList.contains("gruen") ? "gruen" : (erledigtRow.classList.contains("rot") ? "rot" : "");
+        entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+        entry["Parzelle"] = nummer;
+        localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
+      }
 
-        if (entry["Kommentar"]) {
-          body += `Kommentar: ${entry["Kommentar"]}\n`;
+      function checkFrist() {
+        // Reset
+        details.classList.remove("accordion-gruen", "accordion-rot", "frist-overdue");
+        summary.classList.remove("accordion-gruen", "accordion-rot", "frist-overdue");
+        content.classList.remove("accordion-gruen", "accordion-rot");
+        fristRow.classList.remove("accordion-rot");
+        fristDateRow.classList.remove("accordion-rot");
+        fristHinweis.style.display = "none";
+
+        const alleGruen = labels.every(label => state[label].classList.contains("gruen"));
+        const fristGesetzt = !!fristDate.value;
+        const erledigtIstGruen = erledigtRow.classList.contains("gruen");
+
+        // 1. Wenn alle Kontrollfelder grün: Accordion grün (egal was Frist/Erledigt)
+        if (alleGruen) {
+          details.classList.add("accordion-gruen");
+          summary.classList.add("accordion-gruen");
+          content.classList.add("accordion-gruen");
+          return;
         }
 
-        body += "\n";
+        // 2. Wenn Frist gesetzt UND Erledigt grün: Accordion grün
+        if (fristGesetzt && erledigtIstGruen) {
+          details.classList.add("accordion-gruen");
+          summary.classList.add("accordion-gruen");
+          content.classList.add("accordion-gruen");
+          return;
+        }
+
+        // 3. Wenn Frist gesetzt: Accordion rot
+        if (fristGesetzt) {
+          details.classList.add("accordion-rot");
+          summary.classList.add("accordion-rot");
+          content.classList.add("accordion-rot");
+          fristRow.classList.add("accordion-rot");
+          fristDateRow.classList.add("accordion-rot");
+        }
+
+        // 4. Warntext wenn Frist überschritten und nicht erledigt
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const fristVal = fristDate.value;
+        const fristDatum = fristVal ? new Date(fristVal) : null;
+        if (
+          fristDatum && !isNaN(fristDatum) &&
+          !erledigtIstGruen &&
+          now > fristDatum
+        ) {
+          fristHinweis.textContent = "Frist nicht eingehalten – Bitte anschreiben!";
+          fristHinweis.style.display = "";
+          details.classList.add("frist-overdue");
+          summary.classList.add("frist-overdue");
+          fristRow.classList.add("frist-overdue");
+          fristDateRow.classList.add("frist-overdue");
+        }
+      }
+
+      // Initial beim Laden
+      checkFrist();
+
+      details.appendChild(content);
+      // Anzeige, wenn nicht alles erledigt und grün
+      // --> optional: entfernen, wenn du abgeschlossene ausblenden willst
+      container.appendChild(details);
+    }
+
+    function meldeÜberfällige() {
+      const bereichKey = getBereichKey();
+      const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+      let body = "Bei folgenden Parzellen wurden die aufgeführten Punkte beanstandet.\n\nDie gesetzte Frist wurde nicht eingehalten:\n\n";
+      let count = 0;
+
+      Object.entries(data).forEach(([index, entry]) => {
+        if (!entry["Zu erledigen bis"]) return;
+        const deadline = new Date(entry["Zu erledigen bis"]);
+        deadline.setHours(0, 0, 0, 0);
+        const isOverdue = now > deadline;
+        const notDone = entry["Erledigt"] !== "gruen";
+        if (isOverdue && notDone) {
+          count++;
+          const nr = entry["Parzelle"] || (Number(index) + 1);
+          const fristText = deadline.toLocaleDateString("de-DE");
+          body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+          Object.entries(entry).forEach(([key, value]) => {
+            if (value === "rot" && !["Erledigt", "Kommentar"].includes(key)) {
+              body += `- ${key}\n`;
+            }
+          });
+          if (entry["Kommentar"]) {
+            body += `Kommentar: ${entry["Kommentar"]}\n`;
+          }
+          body += "\n";
+        }
+      });
+
+      if (count > 0) {
+        const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${now.toLocaleString("de-DE", { month: "long", year: "numeric" })}`);
+        const mailBody = encodeURIComponent(body);
+        window.location.href = `mailto:kirsten@nachtzuschlag.de?subject=${subject}&body=${mailBody}`;
+      } else {
+        alert("Keine überfälligen Parzellen gefunden.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Bereichsauswahl initialisieren
+      const sel = document.getElementById("bereichSelector");
+      sel.innerHTML = bereiche.map(v => `<option value="${v}">${v.replaceAll("-", " – ")}</option>`).join("");
+      sel.value = localStorage.getItem("parzellenAuswahl") || "1-48";
+      sel.addEventListener("change", e => setParzellenbereich(e.target.value));
+      document.getElementById("btnNew").addEventListener("click", startNewRound);
+      document.getElementById("btnMelden").addEventListener("click", meldeÜberfällige);
+      const data = JSON.parse(localStorage.getItem(getBereichKey()) || "{}");
+      const liste = getParzellenliste();
+      if (Object.keys(data).length > 0) {
+        liste.forEach((nr, index) => createRow(index, data[index], nr));
+      } else {
+        startNewRound();
       }
     });
-
-    if (count > 0) {
-      const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${monatJahr}`);
-      const mailBody = encodeURIComponent(body);
-      window.location.href = `mailto:kirsten@nachtzuschlag.de?subject=${subject}&body=${mailBody}`;
-    } else {
-      alert("Keine überfälligen Parzellen gefunden.");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
-    const bereichKey = getBereichKey();
-    const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-    const liste = getParzellenliste();
-    if (Object.keys(data).length > 0) {
-      liste.forEach((nr, index) => createRow(index, data[index], nr));
-    } else {
-      startNewRound();
-    }
-
-    window.startNewRound = startNewRound;
-    window.meldeÜberfällige = meldeÜberfällige;
-    window.setParzellenbereich = setParzellenbereich;
-  });
-</script>
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register("sw.js").then(() => {
-      console.log("Service Worker registriert");
-    });
-  }
-</script>
-</body>
-
-</script>
+  </script>
 </body>
 </html>
