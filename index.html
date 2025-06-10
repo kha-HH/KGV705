@@ -157,131 +157,129 @@
 
   <table><tbody id="tableBody"></tbody></table>
 
-<script>
-function getParzellenliste() {
-  const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
-  const parts = raw.split(",");
-  const result = [];
+  <script>
+    function getParzellenliste() {
+      const raw = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const parts = raw.split(",");
+      const result = [];
 
-  parts.forEach(part => {
-    const [start, end] = part.split("-").map(Number);
-    for (let i = start; i <= end; i++) result.push(i);
-  });
+      parts.forEach(part => {
+        const [start, end] = part.split("-").map(Number);
+        for (let i = start; i <= end; i++) result.push(i);
+      });
 
-  return result;
-}
+      return result;
+    }
 
-function getBereichKey() {
-  return "mobileKontrolle_" + (localStorage.getItem("parzellenAuswahl") || "1-48");
-}
+    function getBereichKey() {
+      return "mobileKontrolle_" + (localStorage.getItem("parzellenAuswahl") || "1-48");
+    }
 
-function setParzellenbereich(value) {
-  localStorage.setItem("parzellenAuswahl", value);
-  window.location.reload();
-}
+    function setParzellenbereich(value) {
+      localStorage.setItem("parzellenAuswahl", value);
+      window.location.reload();
+    }
 
-function startNewRound() {
-  const bereichKey = getBereichKey();
-  const liste = getParzellenliste();
-  const leeresObjekt = {};
-  liste.forEach((nr, index) => leeresObjekt[index] = {});
-  localStorage.setItem(bereichKey, JSON.stringify(leeresObjekt));
-  document.getElementById("tableBody").innerHTML = "";
-  liste.forEach((nr, index) => createRow(index, {}, nr));
-}
+    function startNewRound() {
+      const bereichKey = getBereichKey();
+      const liste = getParzellenliste();
+      const leeresObjekt = {};
+      liste.forEach((nr, index) => leeresObjekt[index] = {});
+      localStorage.setItem(bereichKey, JSON.stringify(leeresObjekt));
+      document.getElementById("tableBody").innerHTML = "";
+      liste.forEach((nr, index) => createRow(index, {}, nr));
+    }
 
-function createRow(index, savedInput = {}, nummer) {
-  const bereichKey = getBereichKey();
-  const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-  const saved = fullData[index] || savedInput;
+    function createRow(index, savedInput = {}, nummer) {
+      const bereichKey = getBereichKey();
+      const fullData = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+      const saved = fullData[index] || savedInput;
 
-  const tbody = document.getElementById("tableBody");
+      const tbody = document.getElementById("tableBody");
 
-  const details = document.createElement("details");
-  const summary = document.createElement("summary");
-  const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
-  summary.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
-  details.appendChild(summary);
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      const kontrollDatum = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+      summary.textContent = `Parzelle ${nummer} – ${kontrollDatum.split("-").reverse().join(".")}`;
+      details.appendChild(summary);
 
-  const content = document.createElement("div");
-  content.className = "accordion-content";
+      const content = document.createElement("div");
+      content.className = "accordion-content";
 
-  const labels = [
-    "Garten in Ordnung",
-    "Hecke gepflegt",
-    "Allgemeiner Anblick",
-    "Kein Müll vorhanden",
-    "Kein Überwuchs zum Nachbarn",
-    "Kein Satzungsverstoß"
-  ];
+      const labels = [
+        "Garten in Ordnung",
+        "Hecke gepflegt",
+        "Allgemeiner Anblick",
+        "Kein Müll vorhanden",
+        "Kein Überwuchs zum Nachbarn",
+        "Kein Satzungsverstoß"
+      ];
 
-  labels.forEach(label => {
-    const td = document.createElement("td");
-    td.setAttribute("data-label", label);
+      labels.forEach(label => {
+        const td = document.createElement("td");
+        td.setAttribute("data-label", label);
 
-    const rot = document.createElement("button");
-    rot.textContent = "✗";
-    rot.className = "btn-small rot-btn";
-    rot.onclick = () => { td.className = "rot"; saveRow(); };
+        const rot = document.createElement("button");
+        rot.textContent = "✗";
+        rot.className = "btn-small rot-btn";
+        rot.onclick = () => { td.className = "rot"; saveRow(); };
 
-    const gruen = document.createElement("button");
-    gruen.textContent = "✓";
-    gruen.className = "btn-small gruen-btn";
-    gruen.onclick = () => { td.className = "gruen"; saveRow(); };
+        const gruen = document.createElement("button");
+        gruen.textContent = "✓";
+        gruen.className = "btn-small gruen-btn";
+        gruen.onclick = () => { td.className = "gruen"; saveRow(); };
 
-    td.appendChild(rot);
-    td.appendChild(gruen);
-    if (saved[label]) td.className = saved[label];
+        td.appendChild(rot);
+        td.appendChild(gruen);
+        if (saved[label]) td.className = saved[label];
 
-    content.appendChild(td);
-  });
+        content.appendChild(td);
+      });
 
-  const kommentar = document.createElement("td");
-  const ta = document.createElement("textarea");
-  ta.placeholder = "Kommentar zur Parzelle";
-  if (saved["Kommentar"]) ta.value = saved["Kommentar"];
-  ta.onchange = saveRow;
-  kommentar.appendChild(ta);
-  content.appendChild(kommentar);
+      const kommentar = document.createElement("td");
+      const ta = document.createElement("textarea");
+      ta.placeholder = "Kommentar zur Parzelle";
+      if (saved["Kommentar"]) ta.value = saved["Kommentar"];
+      ta.onchange = saveRow;
+      kommentar.appendChild(ta);
+      content.appendChild(kommentar);
 
-  details.appendChild(content);
+      details.appendChild(content);
 
-  const alleGruen = labels.every(label => saved[label] && saved[label].includes("gruen")) 
-                 && saved["Erledigt"] && saved["Erledigt"].includes("gruen");
+      const alleGruen = labels.every(label => saved[label] && saved[label].includes("gruen")) 
+                     && saved["Erledigt"] && saved["Erledigt"].includes("gruen");
 
-  if (alleGruen) {
-    return;
-  }
+      if (alleGruen) return;
 
-  tbody.appendChild(details);
+      tbody.appendChild(details);
 
-  function saveRow() {
-  const bereichKey = getBereichKey();
-  const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-  const entry = {};
-  labels.forEach(label => {
-    const tdElement = [...content.querySelectorAll("td")].find(td => td.getAttribute("data-label") === label);
-    entry[label] = tdElement?.className || "";
-  });
-  entry["Kommentar"] = ta.value;
-  entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
-  entry["Parzelle"] = nummer;
-  localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
-}
+      function saveRow() {
+        const bereichKey = getBereichKey();
+        const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+        const entry = {};
+        labels.forEach(label => {
+          const tdElement = [...content.querySelectorAll("td")].find(td => td.getAttribute("data-label") === label);
+          entry[label] = tdElement?.className || "";
+        });
+        entry["Kommentar"] = ta.value;
+        entry["Kontrolldatum"] = saved["Kontrolldatum"] || new Date().toISOString().split("T")[0];
+        entry["Parzelle"] = nummer;
+        localStorage.setItem(bereichKey, JSON.stringify({ ...data, [index]: entry }));
+      }
+    }
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
-  const bereichKey = getBereichKey();
-  const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
-  const liste = getParzellenliste();
-  if (Object.keys(data).length > 0) {
-    liste.forEach((nr, index) => createRow(index, data[index], nr));
-  } else {
-    startNewRound();
-  }
-});
-</script>
-
+    // DOMContentLoaded Listener richtig platzieren:
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("bereichSelector").value = localStorage.getItem("parzellenAuswahl") || "1-48";
+      const bereichKey = getBereichKey();
+      const data = JSON.parse(localStorage.getItem(bereichKey) || "{}");
+      const liste = getParzellenliste();
+      if (Object.keys(data).length > 0) {
+        liste.forEach((nr, index) => createRow(index, data[index], nr));
+      } else {
+        startNewRound();
+      }
+    });
+  </script>
 </body>
 </html>
