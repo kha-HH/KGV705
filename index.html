@@ -467,27 +467,27 @@ summary::-webkit-details-marker {
       let count = 0;
 
       Object.entries(data).forEach(([index, entry]) => {
-        if (!entry["Zu erledigen bis"]) return;
-        const deadline = new Date(entry["Zu erledigen bis"]);
-        deadline.setHours(0, 0, 0, 0);
-        const isOverdue = now > deadline;
-        const notDone = entry["Erledigt"] !== "gruen";
-        if (isOverdue && notDone) {
-          count++;
-          const nr = entry["Parzelle"] || (Number(index) + 1);
-          const fristText = deadline.toLocaleDateString("de-DE");
-          body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
-          Object.entries(entry).forEach(([key, value]) => {
-            if (value === "rot" && !["Erledigt", "Kommentar"].includes(key)) {
-              body += `- ${key}\n`;
-            }
-          });
-          if (entry["Kommentar"]) {
-            body += `Kommentar: ${entry["Kommentar"]}\n`;
-          }
-          body += "\n";
-        }
-      });
+  if (!entry["Zu erledigen bis"]) return;
+  const deadline = new Date(entry["Zu erledigen bis"]);
+  deadline.setHours(0, 0, 0, 0);
+  const isOverdue = now > deadline;
+  const notDone = entry["Erledigt"] !== "gruen";
+  if (isOverdue && notDone) {
+    count++;
+    const nr = entry["Parzelle"] || (Number(index) + 1);
+    const fristText = deadline.toLocaleDateString("de-DE");
+    body += `Parzelle ${nr} – Frist nicht eingehalten (bis ${fristText}):\n`;
+    Object.entries(entry).forEach(([key, value]) => {
+      if (value === "rot" && !["Erledigt", "Kommentar", "Frist"].includes(key)) {
+        body += `- ${key}\n`;
+      }
+    });
+    if (entry["Kommentar"]) {
+      body += `Kommentar: ${entry["Kommentar"]}\n`;
+    }
+    body += "\n";
+  }
+});
 
       if (count > 0) {
         const subject = encodeURIComponent(`[Wegekontrolle] Meldung Parzellen – ${now.toLocaleString("de-DE", { month: "long", year: "numeric" })}`);
